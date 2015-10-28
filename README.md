@@ -39,7 +39,7 @@ Installation
 
 and the script, called `t2t_math_ml`, is in there.
 
-The `Makefile` is only needed to compile the test, or to generation the documentation (this file) to other formats (\`\`md\`\` or `html`).
+The `Makefile` is only needed to compile the test, or to generation the documentation (this file) to other formats ( `md` or `html`).
 
 Quick Start
 ===========
@@ -66,7 +66,7 @@ Or in a math block on one or several lines:
     $$
     '''
 
-See some examples [here](https://anne.pacalet.fr/dev/t2t_math_ml/) (\[source <https://anne.pacalet.fr/dev/t2t_math_ml/test.t2t>\], [xhtml](https://anne.pacalet.fr/dev/t2t_math_ml/test.xhtml), [pdf](https://anne.pacalet.fr/dev/t2t_math_ml/test.pdf)).
+See some examples [here](https://anne.pacalet.fr/dev/t2t_math_ml/) ( [source](https://anne.pacalet.fr/dev/t2t_math_ml/test.t2t), [xhtml](https://anne.pacalet.fr/dev/t2t_math_ml/test.xhtml), [pdf](https://anne.pacalet.fr/dev/t2t_math_ml/test.pdf) ).
 
 Some examples of LaTeX formulas can be found in [LaTeX Cookbook](http://www.personal.ceu.hu/tex/cookbook.html).
 
