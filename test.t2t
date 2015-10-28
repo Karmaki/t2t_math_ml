@@ -1,0 +1,70 @@
+Tests for t2t\_math\_ml
+Anne Pacalet
+Version 0.2
+%===============================================================================
+%!encoding: UTF-8
+
+%!options(xhtml): --style txt2tags.css --css-sugar
+
+% A line that will only appear in html version
+%!preproc(xhtml): "%html% " ""
+
+%!postproc(xhtml): "<head>" '<head><meta http-equiv="Content-type" content="application/xhtml+xml;charset=UTF-8"/>'
+
+%===============================================================================
+= Presentation =
+
+``t2t_math_ml`` is
+a script to be used together with [``txt2tags`` http://txt2tags.org/]
+in order to translate formulas to MathML in the generated web pages.
+See it on [GitHub https://github.com/Karmaki/t2t_math_ml/].
+
+This document is used as a test for the tool.
+%html% It is also compiled to [PDF test.pdf].
+
+
+%----------------
+= Examples and Tests =
+
+This is a simple inline formula : ''$x = \sqrt{y+z}$'' that should be parsed.
+
+''$x = \sqrt{y+z}$'' at the begining of the line,
+or at the end of the line : ''$x = \sqrt{y+z}$''
+
+Or even one formula ''$x = \sqrt{y+z}$'' and another one ''$x = \sqrt{y+z}$''
+on the same line.
+
+We can even have lines without any formulas !
+
+This is a one line block formula :
+''' $$ x = \sqrt{a + b + c} $$
+
+Can have space at the begining and at the and :
+'''   $$ x = \sqrt{a + b + c} $$   
+
+% but no text at the begining: ''' $$ x = \sqrt{a + b + c} $$
+
+This is a real math block :
+'''
+$$
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
+'''
+and another one :
+'''
+$$
+\int_0^\infty f(x+y) dx = |z|~. 
+$$
+'''
+
+It can also be on several lines:
+'''
+$$
+|x| = \left\{ \begin{array}{rl}
+ -x & \mbox{ if } x<0 \\
+  x & \mbox{ otherwise}
+       \end{array} \right.
+$$
+'''
+
+%----------------

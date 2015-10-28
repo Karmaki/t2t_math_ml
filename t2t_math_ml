@@ -1,0 +1,161 @@
+#! /usr/bin/perl -w -s
+#===============================================================================
+#             This file is part of the t2t_math_ml tools.
+#  Copyright (C) 2013-2015 Anne Pacalet (Anne.Pacalet@free.fr)
+#                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#      This file is distributed under the terms of the
+#       GNU Lesser General Public License Version 2.1
+#===============================================================================
+use strict;
+use diagnostics;
+#===============================================================================
+my $prog = $0; $prog =~ s=.*/==;
+
+our $version;
+my $version_num = "0.1";
+my $version_date = "May 2013";
+
+our $v;
+my $verbose = $v || 0;
+
+our $h;
+my $help = $h || 0;
+
+sub err { print STDERR "ERROR: @_\n"; exit (1); }
+sub msg { my $n = shift; print STDERR join ("", @_), "\n" if $n <= $verbose; }
+
+sub usage () {
+  my $heredoc = <<END;
+Usage: $prog [OPTIONS] input_filename
+OPTIONS:
+	-h	print this message and exits;
+	-v=n	set verbosity level to n (default is 0);
+	-v	same than -v=1;
+
+Process the input file which should be the result of 'txt2tags -t xhtml' 
+and generates an output file where the equations are translated to MathML 
+using 'latexmlmath' (so, it must be installed).
+The output file is named like the input_filename where the extension 
+(usually .html) is replaced by '.xhtml' (mandatory for MathML).
+END
+  print $heredoc;
+}
+
+sub init () {
+  if ($help) {
+    usage ();
+    exit (0);
+  }
+
+  if ($version) {
+    print "$prog version $version_num ($version_date)\n";
+    exit (0);
+  }
+
+  if (@ARGV != 1) {
+    usage ();
+    err "wrong argument number";
+  }
+
+  my ($html_file) = @ARGV;
+  msg (1, "Input file: $html_file");
+
+  msg (1, "Verbose level = $verbose");
+
+  my $xml_file = $html_file;
+  $xml_file =~ s/\.[^.]*$//;
+  $xml_file .= ".xhtml";
+  msg (1, "Output file: $xml_file");
+  if ($html_file eq $xml_file) {
+    err "cannot have the same file $html_file as both input and output";
+  }
+
+  my $in; my $out;
+  open ($in, "<", $html_file) or die "Cannot open $html_file : $!\n";
+  open ($out, ">", $xml_file)  or die "Cannot open $xml_file : $!\n";
+
+  return $in, $out;
+}
+#===============================================================================
+sub mk_math ($$) {
+  my $inline = shift;
+  my $formula = shift;
+
+  $formula =~ s/\\\\/\\\\\\\\/;
+  my @cmd = ("echo -E \"$formula\"",
+             'latexmlmath --pmml=- - ',
+             'grep -v "xml version" ');
+  my $cmd_str = join( ' | ', @cmd );
+  msg (2, "CMD=$cmd_str");
+  my $math = qx( bash -c '$cmd_str' );
+  if ($? != 0) {
+    warn "the following command failed: $cmd_str\n";
+    $math = "(<b>bad formula</b>: <code>$formula</code>)";
+  }
+  elsif ($inline) {
+    $math =~ s/display="block"/display="inline"/;
+  }
+  msg (3, "RES=$math");
+  return $math;
+}
+
+my $one_line_bmath = '^\s*\$\$(.+)\$\$\s*$';
+my $inline_math = '\$(.+?)\$';
+my $bmath_delim = '^\$\$\s*$';
+
+sub do_inline_math ($) {
+  my $line = shift;
+  my $newline = $line;
+  while ( $line =~ /$inline_math/) {
+    my $formula = $1 ;
+    # printf ("line: '$line'\n");
+    # printf ("inline_math: '$inline_math'\n");
+    # printf ("formula: '$formula'\n");
+    my $math = mk_math (1, $formula);
+    $newline =~ s/$inline_math/$math/;
+    $line =~ s/$inline_math//;
+  }
+  return $newline;
+}
+
+sub process ($$) {
+  my ($in, $out) = @_;
+  my $math_block;
+  while ( my $line = <$in> ) {
+    if (defined $math_block) {
+      if ( $line =~ /$bmath_delim/ ) {  # end math block
+	my $math = mk_math (0, $math_block);
+	printf ( $out "%s", $math);
+	msg (2, "OUTPUT: $math");
+	$math_block = undef;
+      }
+      else { # continue math block
+	$math_block = $math_block . " " . $line; 
+      }
+    }
+    else { # not in math block (yet)
+      if ( $line =~ /$one_line_bmath/ ) {
+	my $math = mk_math (0, $1);
+	printf ( $out "%s", $math);
+      }
+      elsif ( $line =~ /$inline_math/) {
+	$line = do_inline_math ($line);
+	printf ( $out "%s", $line);
+      }
+      elsif ( $line =~ /$bmath_delim/ ) { # start math block
+	$math_block = "";
+      }
+      else {
+	printf ( $out "%s", $line);
+      }
+    }
+  }
+}
+
+eval {
+  my ($in, $out) = init ();
+  process ($in, $out);
+  close $in; close $out;
+} or do {
+  err "$@";
+}
