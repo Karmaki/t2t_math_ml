@@ -12,8 +12,8 @@ use diagnostics;
 my $prog = $0; $prog =~ s=.*/==;
 
 our $version;
-my $version_num = "0.1";
-my $version_date = "May 2013";
+my $version_num = "0.2";
+my $version_date = "Octobre 2015";
 
 our $v;
 my $verbose = $v || 0;
@@ -28,9 +28,10 @@ sub usage () {
   my $heredoc = <<END;
 Usage: $prog [OPTIONS] input_filename
 OPTIONS:
-	-h	print this message and exits;
-	-v=n	set verbosity level to n (default is 0);
-	-v	same than -v=1;
+        -h       print this message and exits;
+        -version print the version number and exits;
+        -v=n     set verbosity level to n (default is 0);
+        -v      same than -v=1;
 
 Process the input file which should be the result of 'txt2tags -t xhtml' 
 and generates an output file where the equations are translated to MathML 
@@ -124,29 +125,29 @@ sub process ($$) {
   while ( my $line = <$in> ) {
     if (defined $math_block) {
       if ( $line =~ /$bmath_delim/ ) {  # end math block
-	my $math = mk_math (0, $math_block);
-	printf ( $out "%s", $math);
-	msg (2, "OUTPUT: $math");
-	$math_block = undef;
+        my $math = mk_math (0, $math_block);
+        printf ( $out "%s", $math);
+        msg (2, "OUTPUT: $math");
+        $math_block = undef;
       }
       else { # continue math block
-	$math_block = $math_block . " " . $line; 
+        $math_block = $math_block . " " . $line; 
       }
     }
     else { # not in math block (yet)
       if ( $line =~ /$one_line_bmath/ ) {
-	my $math = mk_math (0, $1);
-	printf ( $out "%s", $math);
+        my $math = mk_math (0, $1);
+        printf ( $out "%s", $math);
       }
       elsif ( $line =~ /$inline_math/) {
-	$line = do_inline_math ($line);
-	printf ( $out "%s", $line);
+        $line = do_inline_math ($line);
+        printf ( $out "%s", $line);
       }
       elsif ( $line =~ /$bmath_delim/ ) { # start math block
-	$math_block = "";
+        $math_block = "";
       }
       else {
-	printf ( $out "%s", $line);
+        printf ( $out "%s", $line);
       }
     }
   }
